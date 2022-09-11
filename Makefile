@@ -19,6 +19,9 @@ install:
 	brew install grpcurl
 	export GO_PATH=~/go 
 	export PATH=$PATH:/$GO_PATH/bin
+path:
+	export GO_PATH=~/go 
+	export PATH=$PATH:/$GO_PATH/bin
 
 test:
 	rm -rf tmp && mkdir tmp

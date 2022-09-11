@@ -4,19 +4,18 @@ import (
 	"context"
 	"log"
 	"net"
+	"os"
 
+	"cache-service/server/database"
 	pb "cache-service/server/pb/cache"
-	"cache-service/server/pb/cache/service"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 )
 
 type server struct {
 	pb.UnimplementedCacheServiceServer
-	Logic *service.RedisDB
+	db database.Database
 }
 
 func main() {
@@ -27,9 +26,13 @@ func main() {
 
 	s := grpc.NewServer()
 	reflection.Register(s)
-	logic := service.NewRedisDB(log.Default())
+	databaseImplementation := os.Args[1]
+	db, err := database.Factory(databaseImplementation)
+	if err != nil {
+		panic(err)
+	}
 	ser := &server{
-		Logic: logic,
+		db: db,
 	}
 	pb.RegisterCacheServiceServer(s, ser)
 	if err := s.Serve(listener); err != nil {
@@ -37,26 +40,18 @@ func main() {
 	}
 }
 
-func (s *server) GetValue(ctx context.Context, in *pb.GetRequest) (*pb.GetResponse, error) {
-	log.Printf("Received request: %v", in.ProtoReflect().Descriptor().FullName())
-	val, err := s.Logic.Get(context.Background(), in.Key)
-	if err != nil {
-		log.Printf("Error: %v", err)
-		return nil, err
-	}
-	return &pb.GetResponse{
-		Value: string(val),
-	}, nil
+func (s *server) SetValue(ctx context.Context, in *pb.SetRequest) (*pb.ServerResponse, error) {
+	value, err := s.db.Set(in.GetKey(), in.GetValue())
+	return generateResponse(value, err)
+}
+func (s *server) GetValue(ctx context.Context, in *pb.GetRequest) (*pb.ServerResponse, error) {
+	value, err := s.db.Get(in.GetKey())
+	return generateResponse(value, err)
 }
 
-func (s *server) SetValue(ctx context.Context, in *pb.SetRequest) (*pb.SetResponse, error) {
-	log.Printf("Received request: %v", in.ProtoReflect().Descriptor().FullName())
-	err := s.Logic.Set(context.Background(), in.Key, []byte(in.Value))
+func generateResponse(value []byte, err error) (*pb.ServerResponse, error) {
 	if err != nil {
-		log.Printf("Error: %v", err)
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return &pb.ServerResponse{Success: false, Value: string(value), Error: err.Error()}, nil
 	}
-	return &pb.SetResponse{
-		Message: "Value set successfully",
-	}, nil
+	return &pb.ServerResponse{Success: true, Value: string(value), Error: ""}, nil
 }
