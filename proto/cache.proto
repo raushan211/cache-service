@@ -6,12 +6,12 @@ option go_package = "pb/cache";
 
 message GetRequest {
     string key = 1;
-  }
+}
   
-  message SetRequest {
+message SetRequest {
     string key = 1;
     string value = 2;
-  }
+}
   
 // Server Response
 message ServerResponse{
@@ -19,9 +19,32 @@ message ServerResponse{
   string value = 2;
   string error = 3;
 }
+
+message SetUserRequest {
+  string name = 1;
+  string class = 2;
+  int64 roll_num = 3;
+  bytes metadata = 4;
+}
+
+message GetUserResponse {
+  bool success = 1;
+  string name = 2;
+  string class = 3;
+  int64 roll_num = 4;
+  bytes metadata = 5;
+  string error = 6;
+}
+
+message GetUserRequest {
+  string name = 1;
+  int64 roll_num = 2;
+}
   
   // CacheService proto caching service
   service CacheService {
     rpc GetValue(GetRequest) returns (ServerResponse) {}
     rpc SetValue(SetRequest) returns (ServerResponse) {}
+    rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+    rpc SetUser(SetUserRequest) returns (ServerResponse) {}
   }

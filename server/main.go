@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -49,9 +51,57 @@ func (s *server) GetValue(ctx context.Context, in *pb.GetRequest) (*pb.ServerRes
 	return generateResponse(value, err)
 }
 
+func (s *server) SetUser(ctx context.Context, in *pb.SetUserRequest) (*pb.ServerResponse, error) {
+	key := fmt.Sprint(in.Name, ":", in.RollNum)
+	user := User{
+		Name:     in.Name,
+		Class:    in.Class,
+		RollNum:  in.RollNum,
+		Metadata: in.Metadata,
+	}
+	value, err := s.db.Set(key, user)
+	return generateResponse(value, err)
+
+}
+
+func (s *server) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	key := fmt.Sprint(in.Name, ":", in.RollNum)
+	value, err := s.db.Get(key)
+	return generateUserResponse(value, err)
+}
+
 func generateResponse(value []byte, err error) (*pb.ServerResponse, error) {
 	if err != nil {
 		return &pb.ServerResponse{Success: false, Value: string(value), Error: err.Error()}, nil
 	}
 	return &pb.ServerResponse{Success: true, Value: string(value), Error: ""}, nil
+}
+func generateUserResponse(value []byte, err error) (*pb.GetUserResponse, error) {
+	user := User{}
+	json.Unmarshal(value, &user)
+	if err != nil {
+		return &pb.GetUserResponse{Success: false, Error: err.Error()}, nil
+	}
+	return &pb.GetUserResponse{
+		Success:  true,
+		Name:     user.Name,
+		RollNum:  user.RollNum,
+		Class:    user.Class,
+		Metadata: user.Metadata,
+		Error:    "",
+	}, nil
+}
+
+type (
+	User struct {
+		Name     string `json:"name"`
+		Class    string `json:"class"`
+		RollNum  int64  `json:"roll_num"`
+		Metadata []byte `json:"metadata"`
+	}
+)
+
+func (i User) MarshalBinary() (data []byte, err error) {
+	bytes, err := json.Marshal(i)
+	return bytes, err
 }

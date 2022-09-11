@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 type CacheServiceClient interface {
 	GetValue(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*ServerResponse, error)
 	SetValue(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*ServerResponse, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	SetUser(ctx context.Context, in *SetUserRequest, opts ...grpc.CallOption) (*ServerResponse, error)
 }
 
 type cacheServiceClient struct {
@@ -48,12 +50,32 @@ func (c *cacheServiceClient) SetValue(ctx context.Context, in *SetRequest, opts 
 	return out, nil
 }
 
+func (c *cacheServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+	out := new(GetUserResponse)
+	err := c.cc.Invoke(ctx, "/cacheservice.CacheService/GetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheServiceClient) SetUser(ctx context.Context, in *SetUserRequest, opts ...grpc.CallOption) (*ServerResponse, error) {
+	out := new(ServerResponse)
+	err := c.cc.Invoke(ctx, "/cacheservice.CacheService/SetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CacheServiceServer is the server API for CacheService service.
 // All implementations must embed UnimplementedCacheServiceServer
 // for forward compatibility
 type CacheServiceServer interface {
 	GetValue(context.Context, *GetRequest) (*ServerResponse, error)
 	SetValue(context.Context, *SetRequest) (*ServerResponse, error)
+	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	SetUser(context.Context, *SetUserRequest) (*ServerResponse, error)
 	mustEmbedUnimplementedCacheServiceServer()
 }
 
@@ -66,6 +88,12 @@ func (UnimplementedCacheServiceServer) GetValue(context.Context, *GetRequest) (*
 }
 func (UnimplementedCacheServiceServer) SetValue(context.Context, *SetRequest) (*ServerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetValue not implemented")
+}
+func (UnimplementedCacheServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedCacheServiceServer) SetUser(context.Context, *SetUserRequest) (*ServerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetUser not implemented")
 }
 func (UnimplementedCacheServiceServer) mustEmbedUnimplementedCacheServiceServer() {}
 
@@ -116,6 +144,42 @@ func _CacheService_SetValue_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CacheService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServiceServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cacheservice.CacheService/GetUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServiceServer).GetUser(ctx, req.(*GetUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CacheService_SetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServiceServer).SetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cacheservice.CacheService/SetUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServiceServer).SetUser(ctx, req.(*SetUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CacheService_ServiceDesc is the grpc.ServiceDesc for CacheService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +194,14 @@ var CacheService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetValue",
 			Handler:    _CacheService_SetValue_Handler,
+		},
+		{
+			MethodName: "GetUser",
+			Handler:    _CacheService_GetUser_Handler,
+		},
+		{
+			MethodName: "SetUser",
+			Handler:    _CacheService_SetUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
