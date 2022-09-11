@@ -8,8 +8,13 @@ clean:
 	rm -rf server/pb/
 	rm -rf client/pb/
 
+.PHONY: run server
 server:
-	go run main.go
+	go run server/main.go redis
+
+.PHONY: run client
+client:
+	go run client/main.go
 
 install:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26
@@ -19,6 +24,7 @@ install:
 	brew install grpcurl
 	export GO_PATH=~/go 
 	export PATH=$PATH:/$GO_PATH/bin
+	go mod vendor
 path:
 	export GO_PATH=~/go 
 	export PATH=$PATH:/$GO_PATH/bin

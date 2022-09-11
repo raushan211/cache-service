@@ -34,9 +34,11 @@ func (r *redisDatabase) PrepareKey(key string) string {
 }
 
 //Set ttl to 300 seconds
-func (r *redisDatabase) Set(key string, value string) ([]byte, error) {
+func (r *redisDatabase) Set(key string, value interface{}) ([]byte, error) {
 	_, err := r.client.Set(r.PrepareKey(key), value, time.Second*300).Result()
+	fmt.Println("key: ", key)
 	if err != nil {
+		fmt.Println("error:", err)
 		return generateError("set", err)
 	}
 	return []byte(key), nil
