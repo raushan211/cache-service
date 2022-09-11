@@ -3,6 +3,7 @@ module cache-service
 go 1.18
 
 require (
+	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect

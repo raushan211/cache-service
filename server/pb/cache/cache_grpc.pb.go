@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CacheServiceClient interface {
-	GetValue(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
-	SetValue(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
+	GetValue(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*ServerResponse, error)
+	SetValue(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*ServerResponse, error)
 }
 
 type cacheServiceClient struct {
@@ -30,8 +30,8 @@ func NewCacheServiceClient(cc grpc.ClientConnInterface) CacheServiceClient {
 	return &cacheServiceClient{cc}
 }
 
-func (c *cacheServiceClient) GetValue(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
-	out := new(GetResponse)
+func (c *cacheServiceClient) GetValue(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*ServerResponse, error) {
+	out := new(ServerResponse)
 	err := c.cc.Invoke(ctx, "/cacheservice.CacheService/GetValue", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -39,8 +39,8 @@ func (c *cacheServiceClient) GetValue(ctx context.Context, in *GetRequest, opts 
 	return out, nil
 }
 
-func (c *cacheServiceClient) SetValue(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error) {
-	out := new(SetResponse)
+func (c *cacheServiceClient) SetValue(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*ServerResponse, error) {
+	out := new(ServerResponse)
 	err := c.cc.Invoke(ctx, "/cacheservice.CacheService/SetValue", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -52,8 +52,8 @@ func (c *cacheServiceClient) SetValue(ctx context.Context, in *SetRequest, opts 
 // All implementations must embed UnimplementedCacheServiceServer
 // for forward compatibility
 type CacheServiceServer interface {
-	GetValue(context.Context, *GetRequest) (*GetResponse, error)
-	SetValue(context.Context, *SetRequest) (*SetResponse, error)
+	GetValue(context.Context, *GetRequest) (*ServerResponse, error)
+	SetValue(context.Context, *SetRequest) (*ServerResponse, error)
 	mustEmbedUnimplementedCacheServiceServer()
 }
 
@@ -61,10 +61,10 @@ type CacheServiceServer interface {
 type UnimplementedCacheServiceServer struct {
 }
 
-func (UnimplementedCacheServiceServer) GetValue(context.Context, *GetRequest) (*GetResponse, error) {
+func (UnimplementedCacheServiceServer) GetValue(context.Context, *GetRequest) (*ServerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetValue not implemented")
 }
-func (UnimplementedCacheServiceServer) SetValue(context.Context, *SetRequest) (*SetResponse, error) {
+func (UnimplementedCacheServiceServer) SetValue(context.Context, *SetRequest) (*ServerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetValue not implemented")
 }
 func (UnimplementedCacheServiceServer) mustEmbedUnimplementedCacheServiceServer() {}
